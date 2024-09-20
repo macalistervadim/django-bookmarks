@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "django-bookmarks"
+version = "0.1.0"
+description = ""
+authors = ["macalistervadim <macalistervadim@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^5.1.1"
+python-dotenv = "^1.0.1"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "^7.1.1"
+flake8-absolute-import = "^1.0.0.2"
+flake8-commas = "^4.0.0"
+flake8-import-order = "^0.18.2"
+flake8-print = "^5.0.0"
+flake8-quotes = "^3.4.0"
+flake8-use-pathlib = "^0.3.0"
+pep8-naming = "^0.14.1"
+black = "^24.8.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length=79
