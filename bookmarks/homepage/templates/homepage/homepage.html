@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookmarks | Главная страница</title>
+  <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+  <style>
+  body {
+    background-color: #121212;
+    color: white;
+  }
+  .nav-link {
+    color: #ffffff;
+  }
+  .nav-link:hover {
+    color: #b3b3b3;
+  }
+  .content-section {
+    padding: 50px 0;
+  }
+  .btn-outline-info {
+    transition: all 0.3s ease;
+  }
+  .btn-outline-info:hover {
+    background-color: #17a2b8;
+    color: #ffffff;
+  }
+  .card {
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.3s;
+  }
+  .card:hover {
+    transform: translateY(-10px);
+  }
+  .card-title {
+    font-size: 1.5rem;
+  }
+  .card-text {
+    font-size: 1rem;
+  }
+
+  .icon-square {
+    font-size: 3rem;
+    color: #007bff;
+    background: none;
+    border: none;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .col h2 {
+    font-size: 1.25rem;
+  }
+  .col p {
+    flex-grow: 1;
+  }
+  .col a {
+    align-self: flex-start;
+  }
+  .row-cols-lg-3 > .col {
+    min-height: 200px;
+  }
+
+  footer {
+    background-color: #1a1a1a;
+    padding: 40px 0;
+    color: #b3b3b3;
+    text-align: center;
+  }
+  footer p {
+    margin-bottom: 0;
+  }
+  footer a {
+    color: #17a2b8;
+    text-decoration: none;
+  }
+  footer a:hover {
+    color: #ffffff;
+  }
+  footer .social-icons {
+    margin-top: 10px;
+  }
+  footer .social-icons a {
+    margin: 0 10px;
+    color: #b3b3b3;
+    font-size: 1.5rem;
+    transition: color 0.3s;
+  }
+  footer .social-icons a:hover {
+    color: #17a2b8;
+  }
+</style>
+
+</head>
+<body>
+  <header class="d-flex justify-content-center py-3 border-bottom">
+    <ul class="nav nav-pills">
+      <li class="nav-item"><a href="{% url 'homepage:homepage' %}" class="nav-link" aria-current="page">Главная страница</a></li>
+      <li class="nav-item"><a href="{% url 'account:dashboard' %}" class="nav-link">Страница социальной сети</a></li>
+    </ul>
+  </header>
+
+  <div class="container content-section text-center">
+    <h1 class="display-5 fw-bold">Добро пожаловать в мою социальную сеть</h1>
+    <p class="fs-5 mb-4">Данный проект представляет собой некую социальную сеть, где пользователь может делиться контентом, подписываться на других пользователей и др.</p>
+    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      <a href="{% url 'account:dashboard' %}"><button type="button" class="btn btn-outline-primary btn-lg px-4 me-sm-3 fw-bold">Перейти в соц. сеть</button></a>
+    </div>
+  </div>
+
+  <div class="container content-section text-center">
+    <h2 class="pb-2 border-bottom">Возможности проекта</h2>
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+      <div class="col d-flex align-items-start">
+        <div class="icon-square">
+          <i class="bi bi-toggle-on"></i>
+        </div>
+        <div>
+          <h2>Подписки на пользователей</h2>
+          <p>Вы можете подписываться на других пользователей и получать уведомления о их активности.</p>
+          <a href="#" class="btn btn-primary">
+            Подробнее
+          </a>
+        </div>
+      </div>
+      <div class="col d-flex align-items-start">
+        <div class="icon-square">
+          <i class="bi bi-chat-dots"></i>
+        </div>
+        <div>
+          <h2>Комментарии и лайки</h2>
+          <p>Оставляйте комментарии под постами и ставьте лайки, чтобы взаимодействовать с контентом.</p>
+          <a href="#" class="btn btn-primary">
+            Подробнее
+          </a>
+        </div>
+      </div>
+      <div class="col d-flex align-items-start">
+        <div class="icon-square">
+          <i class="bi bi-shield-lock"></i>
+        </div>
+        <div>
+          <h2>Приватные сообщения</h2>
+          <p>Отправляйте приватные сообщения своим друзьям и оставайтесь на связи в приватном чате.</p>
+          <a href="#" class="btn btn-primary">
+            Подробнее
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="mt-5">
+    <p>Создано <a href="https://github.com/macalistervadim" target="_blank">macalistervadim</a></p>
+    <div class="social-icons">
+      <a href="https://github.com/macalistervadim" target="_blank"><i class="fab fa-github"></i></a>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/bootstrap.min.js' %}"></script>
+</body>
+</html>

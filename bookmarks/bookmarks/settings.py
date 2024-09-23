@@ -25,6 +25,7 @@ ALLOWED_HOSTS = load_list(key="DJANGO_ALLOWED_HOSTS", default="*")
 
 INSTALLED_APPS = [
     "account.apps.AccountConfig",
+    "homepage.apps.HomepageConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
