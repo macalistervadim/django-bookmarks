@@ -74,3 +74,57 @@ class TestLoginUserView(TestCase):
         )
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
+
+
+class TestPasswordChange(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="old_password",
+        )
+        self.client.login(username="testuser", password="old_password")
+
+    def test_password_change_view(self):
+        response = self.client.get(reverse("account:password_change"))
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(
+            response,
+            "registration/password_change_form.html",
+        )
+
+    def test_successful_password_change(self):
+        response = self.client.post(
+            reverse("account:password_change"),
+            {
+                "old_password": "old_password",
+                "new_password1": "new_password",
+                "new_password2": "new_password",
+            },
+        )
+        self.assertRedirects(response, reverse("account:password_change_done"))
+        self.user.refresh_from_db()
+        self.assertTrue(self.user.check_password("new_password"))
+
+    def test_unsuccessful_password_change_with_incorrect_old_password(self):
+        response = self.client.post(
+            reverse("account:password_change"),
+            {
+                "old_password": "wrong_password",
+                "new_password1": "new_password",
+                "new_password2": "new_password",
+            },
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(
+            response,
+            "registration/password_change_form.html",
+        )
+
+        form = response.context["form"]
+        self.assertTrue(form.errors)
+        self.assertIn(
+            "Your old password was entered incorrectly. "
+            "Please enter it again.",
+            form.errors["old_password"],
+        )

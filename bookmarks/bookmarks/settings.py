@@ -46,10 +46,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "bookmarks.urls"
 
+TEMPLATES_DIRS = BASE_DIR / "templates"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [TEMPLATES_DIRS],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -112,3 +113,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = "account:dashboard"
 LOGIN_URL = "account:login"
 LOGOUT_REDIRECT_URL = "account:logout"
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

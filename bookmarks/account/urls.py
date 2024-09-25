@@ -1,5 +1,4 @@
-from django.contrib.auth import views as auth_views
-from django.urls import path
+from django.urls import include, path
 
 import account.views
 
@@ -7,7 +6,21 @@ import account.views
 app_name = "account"
 
 urlpatterns = [
-    path("login/", auth_views.LoginView.as_view(), name="login"),
-    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
-    path("", account.views.dashboard, name="dashboard"),
+    path("", include("django.contrib.auth.urls")),
+    path(
+        "password-change/",
+        account.views.CustomPasswordChangeView.as_view(),
+        name="password_change",
+    ),
+    path(
+        "password-reset/",
+        account.views.CustomPasswordResetView.as_view(),
+        name="password_reset",
+    ),
+    path(
+        "password-reset/<uidb64>/<token>/",
+        account.views.CustomPasswordResetConfirmView.as_view(),
+        name="password_reset_confirm",
+    ),
+    path("", account.views.DashboardView.as_view(), name="dashboard"),
 ]
