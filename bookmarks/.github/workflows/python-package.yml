@@ -35,4 +35,4 @@ jobs:
       run: cd bookmarks
 
     - name: Run tests
-      run: poetry run python manage.py test --verbosity=2
+      run: poetry run python bookmarks/manage.py test --verbosity=2
