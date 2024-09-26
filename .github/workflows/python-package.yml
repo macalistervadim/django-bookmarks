@@ -32,4 +32,4 @@ jobs:
       run: poetry run black --check .
 
     - name: Tests
-      run: poetry run python3 manage.py test
+      run: poetry run python3 bookmarks/manage.py test
