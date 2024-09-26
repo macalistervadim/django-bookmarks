@@ -128,3 +128,36 @@ class TestPasswordChange(TestCase):
             "Please enter it again.",
             form.errors["old_password"],
         )
+
+
+class TestRegistrationView(TestCase):
+    def test_registration_view(self):
+        response = self.client.get(reverse("account:register"))
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertTemplateUsed(response, "account/register.html")
+
+    def test_registration_view_successfully_register_user(self):
+        data = {
+            "username": "user1",
+            "first_name": "John",
+            "email": "mail@mail.ru",
+            "password": "password",
+            "password2": "password",
+        }
+        self.client.post(reverse("account:register"), data)
+        user = User.objects.get(username="user1")
+        self.assertIsNotNone(user)
+
+    def test_registration_view_with_invalid_email(self):
+        data = {
+            "username": "user1",
+            "first_name": "John",
+            "email": "mailmailru",
+            "password": "password",
+            "password2": "password",
+        }
+        response = self.client.post(reverse("account:register"), data)
+        user = User.objects.get(username="user1")
+        self.assertIsNotNone(user)
+
+        self.assertIn("email", response.errors)

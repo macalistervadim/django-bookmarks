@@ -72,3 +72,29 @@ class TestPasswordChangeUrls(TestCase):
     def test_password_change_done_url_anonymous(self):
         response = self.client.get(reverse("account:password_change_done"))
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
+
+
+class TestPasswordResetUrls(TestCase):
+    def test_password_reset_url(self):
+        response = self.client.get(reverse("account:password_reset"))
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+
+class TestRegistrationUserUrls(TestCase):
+    def test_registration_url(self):
+        response = self.client.get(reverse("account:register"))
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_registration_url_successfully_register(self):
+        data = {
+            "username": "user1",
+            "first_name": "John",
+            "email": "mail@mail.ru",
+            "password": "password",
+            "password2": "password",
+        }
+
+        self.client.post(reverse("account:register"), data)
+
+        user = User.objects.get(username="user1")
+        self.assertIsNotNone(user)

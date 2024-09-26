@@ -7,6 +7,7 @@ app_name = "account"
 
 urlpatterns = [
     path("", include("django.contrib.auth.urls")),
+    path("login/", account.views.UserLoginView.as_view(), name="login"),
     path(
         "password-change/",
         account.views.CustomPasswordChangeView.as_view(),
@@ -23,4 +24,5 @@ urlpatterns = [
         name="password_reset_confirm",
     ),
     path("", account.views.DashboardView.as_view(), name="dashboard"),
+    path("register/", account.views.RegisterView.as_view(), name="register"),
 ]

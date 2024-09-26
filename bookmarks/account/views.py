@@ -6,37 +6,51 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 import django.shortcuts
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView
+from django.views.generic import FormView, TemplateView
 
 import account.forms
 
 
-def user_login(request):
-    if request.method == "POST":
-        form = account.forms.LoginForm(request.POST)
-        if form.is_valid():
-            cd = form.cleaned_data
-            user = authenticate(
-                username=cd["username"],
-                password=cd["password"],
-            )
+class UserLoginView(FormView):
+    template_name = "account/login.html"
+    form_class = account.forms.LoginForm
 
-            if user is not None:
-                if user.is_active:
-                    login(request, user)
-                    return HttpResponse("Logged in successfully")
-                else:
-                    return HttpResponse("Your account is disabled")
+    def form_valid(self, form) -> HttpResponse:
+        cd = form.cleaned_data
+        user = authenticate(
+            username=cd["username"],
+            password=cd["password"],
+        )
+
+        if user is not None:
+            if user.is_active:
+                login(self.request, user)
+                return HttpResponse("Logged in successfully")
             else:
-                return HttpResponse("Invalid login or password")
-    else:
-        form = account.forms.LoginForm()
+                return HttpResponse("Your account is disabled")
+        else:
+            return HttpResponse("Invalid login or password")
 
-    return django.shortcuts.render(
-        request=request,
-        template_name="account/login.html",
-        context={"form": form},
-    )
+
+class RegisterView(FormView):
+    template_name = "account/register.html"
+    form_class = account.forms.UserRegistrationForm
+
+    def form_valid(self, form) -> HttpResponse:
+        new_user = form.save(commit=False)
+        new_user.set_password(form.cleaned_data["password"])
+        new_user.save()
+
+        return django.shortcuts.render(
+            self.request,
+            "account/register_done.html",
+            {"new_user": new_user},
+        )
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["user_form"] = self.get_form()
+        return context
 
 
 class DashboardView(LoginRequiredMixin, TemplateView):
