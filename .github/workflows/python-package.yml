@@ -30,3 +30,6 @@ jobs:
 
     - name: Format code with black
       run: poetry run black --check .
+
+    - name: Tests
+      run: poetry run python3 manage.py test
