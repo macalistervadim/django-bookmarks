@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import dotenv
+from django.conf.global_settings import MEDIA_ROOT
 
 dotenv.load_dotenv()
 
@@ -115,3 +116,6 @@ LOGIN_URL = "account:login"
 LOGOUT_REDIRECT_URL = "account:logout"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
