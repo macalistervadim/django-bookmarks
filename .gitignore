@@ -175,3 +175,6 @@ cython_debug/
 
 #fixtures
 *.json
+
+#media-files
+media/

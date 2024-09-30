@@ -3,6 +3,8 @@ from typing import Any
 from django import forms
 from django.contrib.auth.models import User
 
+from account.models import Profile
+
 
 class LoginForm(forms.Form):
     username = forms.CharField()
@@ -26,3 +28,18 @@ class UserRegistrationForm(forms.ModelForm):
             raise forms.ValidationError("Passwords don't match")
 
         return cd["password2"]
+
+
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "email")
+
+
+class ProfileEditForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = [
+            Profile.date_of_birth.field.name,
+            Profile.photo.field.name,
+        ]

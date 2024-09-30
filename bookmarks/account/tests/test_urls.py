@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
+from account.models import Profile
+
 
 class TestDashboardUrls(TestCase):
     def setUp(self):
@@ -78,6 +80,25 @@ class TestPasswordResetUrls(TestCase):
     def test_password_reset_url(self):
         response = self.client.get(reverse("account:password_reset"))
         self.assertEqual(response.status_code, HTTPStatus.OK)
+
+
+class TestEditProfileUrls(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="mail@mail.com",
+            password="password",
+        )
+        self.profile = Profile.objects.create(user=self.user)
+
+    def test_edit_profile_url(self):
+        self.client.login(username="testuser", password="password")
+        response = self.client.get(reverse("account:edit"))
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+    def test_edit_profile_anonymous(self):
+        response = self.client.get(reverse("account:edit"))
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
 
 class TestRegistrationUserUrls(TestCase):

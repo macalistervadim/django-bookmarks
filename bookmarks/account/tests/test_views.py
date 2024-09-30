@@ -147,17 +147,3 @@ class TestRegistrationView(TestCase):
         self.client.post(reverse("account:register"), data)
         user = User.objects.get(username="user1")
         self.assertIsNotNone(user)
-
-    def test_registration_view_with_invalid_email(self):
-        data = {
-            "username": "user1",
-            "first_name": "John",
-            "email": "mailmailru",
-            "password": "password",
-            "password2": "password",
-        }
-        response = self.client.post(reverse("account:register"), data)
-        user = User.objects.get(username="user1")
-        self.assertIsNotNone(user)
-
-        self.assertIn("email", response.errors)

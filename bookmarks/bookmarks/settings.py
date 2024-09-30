@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 import dotenv
-from django.conf.global_settings import MEDIA_ROOT
 
 dotenv.load_dotenv()
 

@@ -2,18 +2,19 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from account.forms import LoginForm, UserRegistrationForm
+import account.forms
+from account.models import Profile
 
 
 class TestLoginForm(TestCase):
     def test_login_form_valid_data(self):
         form_data = {"username": "user1", "password": "testpassword"}
-        form = LoginForm(data=form_data)
+        form = account.forms.LoginForm(data=form_data)
         self.assertTrue(form.is_valid())
 
     def test_login_form_invalid_data(self):
         form_data = {"username": "", "password": ""}
-        form = LoginForm(data=form_data)
+        form = account.forms.LoginForm(data=form_data)
         self.assertFalse(form.is_valid())
         self.assertIn("username", form.errors)
         self.assertIn("password", form.errors)
@@ -56,7 +57,7 @@ class TestUserRegistrationForm(TestCase):
             "password": "password1",
             "password2": "password1",
         }
-        form = UserRegistrationForm(data=form_data)
+        form = account.forms.UserRegistrationForm(data=form_data)
         self.assertTrue(form.is_valid())
 
     def test_user_registration_form_invalid(self):
@@ -67,7 +68,66 @@ class TestUserRegistrationForm(TestCase):
             "password": "password1",
             "password2": "password1231231",
         }
-        form = UserRegistrationForm(data=form_data)
+        form = account.forms.UserRegistrationForm(data=form_data)
 
         self.assertFalse(form.is_valid())
         self.assertIn("password2", form.errors)
+
+
+class TestUserEditForm(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="mail@mail.com",
+            password="password",
+        )
+
+    def test_user_edit_form_valid_data(self):
+        form_data = {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "mailmail@mail.com",
+        }
+        form = account.forms.UserEditForm(data=form_data, instance=self.user)
+        self.assertTrue(form.is_valid())
+
+    def test_user_edit_form_invalid_data(self):
+        form_data = {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "mail...asd.mail.com",
+        }
+        form = account.forms.UserEditForm(data=form_data, instance=self.user)
+        self.assertFalse(form.is_valid())
+        self.assertIn("email", form.errors)
+
+
+class TestProfileEditForm(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="mail@mail.com",
+            password="password",
+        )
+        self.profile = Profile.objects.create(user=self.user)
+
+    def test_profile_edit_form_valid_data(self):
+        form_data = {
+            "date_of_birth": "1990-01-01",
+        }
+        form = account.forms.ProfileEditForm(
+            data=form_data,
+            instance=self.profile,
+        )
+        self.assertTrue(form.is_valid())
+
+    def test_profile_edit_form_invalid_data(self):
+        form_data = {
+            "date_of_birth": "1990-1000-1123132",
+        }
+        form = account.forms.ProfileEditForm(
+            data=form_data,
+            instance=self.profile,
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("date_of_birth", form.errors)

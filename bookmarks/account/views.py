@@ -2,6 +2,7 @@ from typing import Any
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 import django.shortcuts
@@ -9,6 +10,7 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, TemplateView
 
 import account.forms
+import account.models
 
 
 class UserLoginView(FormView):
@@ -40,6 +42,7 @@ class RegisterView(FormView):
         new_user = form.save(commit=False)
         new_user.set_password(form.cleaned_data["password"])
         new_user.save()
+        account.models.Profile.objects.create(user=new_user)
 
         return django.shortcuts.render(
             self.request,
@@ -73,3 +76,33 @@ class CustomPasswordResetView(auth_views.PasswordResetView):
 
 class CustomPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
     success_url = reverse_lazy("account:password_reset_complete")
+
+
+@login_required
+def edit(request):
+    if request.method == "POST":
+        user_form = account.forms.UserEditForm(
+            instance=request.user,
+            data=request.POST,
+        )
+        profile_form = account.forms.ProfileEditForm(
+            instance=request.user.profile,
+            data=request.POST,
+            files=request.FILES,
+        )
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            return django.shortcuts.redirect("account:dashboard")
+    else:
+        user_form = account.forms.UserEditForm(instance=request.user)
+        profile_form = account.forms.ProfileEditForm(
+            instance=request.user.profile,
+        )
+
+    return django.shortcuts.render(
+        request,
+        "account/edit.html",
+        {"user_form": user_form, "profile_form": profile_form},
+    )

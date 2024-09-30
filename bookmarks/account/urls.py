@@ -25,4 +25,5 @@ urlpatterns = [
     ),
     path("", account.views.DashboardView.as_view(), name="dashboard"),
     path("register/", account.views.RegisterView.as_view(), name="register"),
+    path("edit/", account.views.edit, name="edit"),
 ]
