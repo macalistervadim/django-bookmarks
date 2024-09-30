@@ -1,8 +1,8 @@
 from typing import Any
 
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
 import django.shortcuts
@@ -78,31 +78,47 @@ class CustomPasswordResetConfirmView(auth_views.PasswordResetConfirmView):
     success_url = reverse_lazy("account:password_reset_complete")
 
 
-@login_required
-def edit(request):
-    if request.method == "POST":
-        user_form = account.forms.UserEditForm(
-            instance=request.user,
-            data=request.POST,
+class EditView(LoginRequiredMixin, FormView):
+    template_name = "account/edit.html"
+    form_class = account.forms.UserEditForm
+    profile_form_class = account.forms.ProfileEditForm
+    success_url = reverse_lazy("account:edit")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["profile_form"] = self.profile_form_class(
+            instance=self.request.user.profile,
         )
-        profile_form = account.forms.ProfileEditForm(
-            instance=request.user.profile,
+        return context
+
+    def post(self, request, *args, **kwargs):
+        user_form = self.get_form()
+        profile_form = self.profile_form_class(
             data=request.POST,
             files=request.FILES,
+            instance=request.user.profile,
         )
 
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
-            return django.shortcuts.redirect("account:dashboard")
-    else:
-        user_form = account.forms.UserEditForm(instance=request.user)
-        profile_form = account.forms.ProfileEditForm(
-            instance=request.user.profile,
+            messages.success(request, "Profile updated successfully")
+            return django.shortcuts.redirect(self.get_success_url())
+        else:
+            messages.error(request, "Error updating profile")
+            return self.form_invalid(user_form)
+
+    def get_form(self, form_class=None):
+        if form_class is None:
+            form_class = self.get_form_class()
+        return form_class(
+            instance=self.request.user,
+            data=self.request.POST or None,
         )
 
-    return django.shortcuts.render(
-        request,
-        "account/edit.html",
-        {"user_form": user_form, "profile_form": profile_form},
-    )
+    def form_invalid(self, form):
+        context = self.get_context_data(form=form)
+        context["profile_form"] = self.profile_form_class(
+            instance=self.request.user.profile,
+        )
+        return self.render_to_response(context)
