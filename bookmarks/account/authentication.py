@@ -1,5 +1,9 @@
+from typing import Any
+
 from django.contrib.auth.models import User
 from django.http import HttpRequest
+
+import account.models
 
 
 class EmailAuthBackend:
@@ -26,3 +30,16 @@ class EmailAuthBackend:
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:
             return None
+
+
+def create_profile(
+    backend: Any,
+    user: User,
+    *args: Any,
+    **kwargs: Any,
+) -> None:
+    """
+    Создать профиль пользователя для социальной аутентификации
+    """
+    if not account.models.Profile.objects.filter(user=user).exists():
+        account.models.Profile.objects.create(user=user)

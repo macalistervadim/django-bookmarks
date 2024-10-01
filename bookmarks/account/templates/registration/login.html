@@ -4,6 +4,15 @@
 
 {% block content %}
   <h1>Log-in</h1>
+  <div class="social">
+    <ul>
+      <li class="google">
+        <a href="{% url 'social:begin' 'github' %}">
+          Sign up with Github
+        </a>
+      </li>
+    </ul>
+  </div>
   <div class="login-form">
     <form action="{% url 'account:login' %}" method="post">
       {% csrf_token %}
