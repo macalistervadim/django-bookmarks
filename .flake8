@@ -1,5 +1,5 @@
 [flake8]
-application_import_names = account, homepage
+application_import_names = account, homepage, images
 inline-quotes = double
 exclude = .git, __pycache__, migrations, venv
 import-order-style = google
