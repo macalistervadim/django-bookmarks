@@ -11,6 +11,11 @@ class Images(models.Model):
         related_name="images_created",
         on_delete=models.CASCADE,
     )
+    users_like = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="images_liked",
+        blank=True,
+    )
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, blank=True)
     url = models.URLField(max_length=2000)
@@ -31,6 +36,7 @@ class Images(models.Model):
         return (
             f"{self.__class__.__name__}("
             f"{self.user!r}, "
+            f"{self.users_like!r}, "
             f"{self.title!r}, "
             f"{self.slug!r}, "
             f"{self.url!r}, "

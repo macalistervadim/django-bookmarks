@@ -12,6 +12,7 @@ python-dotenv = "^1.0.1"
 pillow = "^10.4.0"
 social-auth-app-django = "^5.4.2"
 psycopg2-binary = "^2.9.9"
+requests = "^2.32.3"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.1.1"
