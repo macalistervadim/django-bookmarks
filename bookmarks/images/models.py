@@ -1,5 +1,6 @@
 from typing import Any
 
+import django.shortcuts
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
@@ -49,3 +50,8 @@ class Images(models.Model):
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+
+    def get_absolute_url(self) -> str:
+        return django.shortcuts.reverse(
+            "images:detail", args=[self.id, self.slug]
+        )

@@ -153,3 +153,9 @@ SOCIAL_AUTH__OAUTH2_WHITELISTED_DOMAINS = [
     "mysite.com",
     "127.0.0.1:8000",
 ]
+
+if DEBUG:
+    import mimetypes
+
+    mimetypes.add_type("application/javascript", ".js", True)
+    mimetypes.add_type("text/css", ".css", True)

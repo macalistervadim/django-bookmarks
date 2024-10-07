@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from images.forms import ImagesCreateForm
+from images.models import Images
 
 
 @login_required
@@ -24,4 +25,14 @@ def image_create(request):
         request,
         "images/image/create.html",
         {"form": form, "section": "images"},
+    )
+
+
+def image_detail(request, id, slug):
+    image = django.shortcuts.get_object_or_404(Images, id=id, slug=slug)
+
+    return django.shortcuts.render(
+        request,
+        "images/image/detail.html",
+        {"image": image, "section": "images"},
     )
