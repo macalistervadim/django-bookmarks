@@ -1,38 +1,42 @@
-import django.shortcuts
-from django.contrib.auth.decorators import login_required
+from typing import Any
+
 from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
+from django.views.generic import CreateView, DetailView
 
 from images.forms import ImagesCreateForm
 from images.models import Images
 
 
-@login_required
-def image_create(request):
-    if request.method == "POST":
-        form = ImagesCreateForm(data=request.POST)
-        if form.is_valid():
-            cd = form.cleaned_data
-            new_image = form.save(commit=False)
-            new_image.user = request.user
-            new_image.save()
-            messages.success(request, "Image added successfully")
+class ImageCreateView(LoginRequiredMixin, CreateView):
+    model = Images
+    form_class = ImagesCreateForm
+    template_name = "images/image/create.html"
 
-            return django.shortcuts.redirect(new_image.get_absolute_url())
-    else:
-        form = ImagesCreateForm(data=request.GET)
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["section"] = "images"
 
-    return django.shortcuts.render(
-        request,
-        "images/image/create.html",
-        {"form": form, "section": "images"},
-    )
+        return context
+
+    def form_valid(self, form: ImagesCreateForm) -> HttpResponse:
+        form.instance.user = self.request.user
+        messages.success(self.request, "Image added successfully")
+
+        return super().form_valid(form)
+
+    def get_success_url(self) -> Any:
+        return self.object.get_absolute_url()
 
 
-def image_detail(request, id, slug):
-    image = django.shortcuts.get_object_or_404(Images, id=id, slug=slug)
+class ImageDetailView(DetailView):
+    model = Images
+    template_name = "images/image/detail.html"
 
-    return django.shortcuts.render(
-        request,
-        "images/image/detail.html",
-        {"image": image, "section": "images"},
-    )
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["image"] = self.object
+        context["section"] = "images"
+
+        return context

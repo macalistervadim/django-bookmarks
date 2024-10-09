@@ -14,8 +14,10 @@ Open your terminal.
 6. Set up your database: `python3 manage.py migrate`
 7. Create a superuser: `python3 manage.py createsuperuser`
 8. Create a `.env` file in the root of your project and define your environment variables (see below for example variables)
-9. Run the development server: `python3 manage.py runserver`
-10. Access the app at [http://127.0.0.1:8000/](http://127.0.0.1:8000/) in your browser.
+9. Run the development server with HTTPS: To run the server with HTTPS, use the following command:
+`python3 manage.py runserver_plus --cert-file cert.crt --key-file key.key`
+Replace cert.crt and key.key with the paths to your SSL certificate and private key files.
+10. Access the app at https://127.0.0.1:8000/ in your browser.
 
 # Important note
 Please note that all the following points below are executed strictly in the base directory of the project, in which you have compiled the repository earlier in the paragraph above

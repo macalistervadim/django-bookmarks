@@ -23,7 +23,9 @@ class TestImageModel(TestCase):
 
     def test_image_creation_successfully(self):
         image_file = SimpleUploadedFile(
-            "test_image.jpg", b"file_content", content_type="image/jpeg"
+            "test_image.jpg",
+            b"file_content",
+            content_type="image/jpeg",
         )
 
         image = images.models.Images.objects.create(

@@ -7,10 +7,10 @@ app_name = "images"
 
 
 urlpatterns = [
-    path("create/", images.views.image_create, name="create"),
+    path("create/", images.views.ImageCreateView.as_view(), name="create"),
     path(
         "detail/<int:id>/<slug:slug>/",
-        images.views.image_detail,
+        images.views.ImageDetailView.as_view(),
         name="detail",
     ),
 ]
