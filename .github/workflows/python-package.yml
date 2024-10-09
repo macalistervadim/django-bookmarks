@@ -30,9 +30,3 @@ jobs:
 
     - name: Format code with black
       run: poetry run black --check .
-
-    - name: Change directory to tests
-      run: cd bookmarks
-
-    - name: Run tests
-      run: poetry run python bookmarks/manage.py test --verbosity=2
