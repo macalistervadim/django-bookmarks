@@ -112,3 +112,85 @@ class ImageCreateViewTests(TestCase):
         )
 
         self.assertEqual(Images.objects.count(), 0)
+
+
+class TestImageLikeView(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass",
+        )
+        self.client.login(username="testuser", password="testpass")
+
+        image_file = SimpleUploadedFile(
+            "test_image.jpg",
+            b"file_content",
+            content_type="image/jpeg",
+        )
+        self.image = Images.objects.create(
+            user=self.user,
+            title="Test Image",
+            description="Test Description",
+            url="https://example.com/image.jpg",
+            slug="test-image",
+            image=image_file,
+        )
+
+    def test_like_image(self):
+        response = self.client.post(
+            django.shortcuts.reverse("images:like"),
+            {"id": self.image.id, "action": "like"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"status": "ok"})
+        self.assertIn(self.user, self.image.users_like.all())
+
+    def test_unlike_image(self):
+        self.image.users_like.add(self.user)
+        response = self.client.post(
+            django.shortcuts.reverse("images:like"),
+            {"id": self.image.id, "action": "unlike"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"status": "ok"})
+        self.assertNotIn(self.user, self.image.users_like.all())
+
+    def test_like_image_not_authenticated(self):
+        self.client.logout()
+        response = self.client.post(
+            django.shortcuts.reverse("images:like"),
+            {"id": self.image.id, "action": "like"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+    def test_like_non_existing_image(self):
+        response = self.client.post(
+            django.shortcuts.reverse("images:like"),
+            {"id": 9999999999, "action": "like"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {"status": "error", "message": "Image does not exist"},
+        )
+
+    def test_missing_id_or_action(self):
+        response = self.client.post(
+            django.shortcuts.reverse("images:like"),
+            {"action": "like"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {"status": "error", "message": "Missing image ID or action"},
+        )
+
+        response = self.client.post(
+            django.shortcuts.reverse("images:like"),
+            {"id": self.image.id},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(
+            response.content,
+            {"status": "error", "message": "Missing image ID or action"},
+        )

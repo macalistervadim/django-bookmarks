@@ -34,6 +34,55 @@ class TestCreateUrls(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
 
+class TestImageLikeUrls(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="mail@mail.com",
+            password="password",
+        )
+        self.profile = Profile.objects.create(
+            user=self.user,
+        )
+
+        image_file = SimpleUploadedFile(
+            "test_image.jpg",
+            b"file_content",
+            content_type="image/jpeg",
+        )
+        self.image = Images.objects.create(
+            user=self.user,
+            title="Test Image",
+            description="Test Description",
+            url="https://example.com/image.jpg",
+            slug="test-image",
+            image=image_file,
+        )
+
+    def test_image_like_url_valid(self):
+        self.client.login(username="testuser", password="password")
+        url = django.shortcuts.reverse("images:like")
+
+        response = self.client.post(
+            url,
+            {"id": self.image.id, "action": "like"},
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertJSONEqual(response.content, {"status": "ok"})
+
+    def test_image_unlike_url_valid(self):
+        self.client.login(username="testuser", password="password")
+        self.image.users_like.add(self.user)
+        url = django.shortcuts.reverse("images:like")
+
+        response = self.client.post(
+            url,
+            {"id": self.image.id, "action": "unlike"},
+        )
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertJSONEqual(response.content, {"status": "ok"})
+
+
 class TestDetailUrls(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(

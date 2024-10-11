@@ -13,5 +13,5 @@ urlpatterns = [
         images.views.ImageDetailView.as_view(),
         name="detail",
     ),
-    path("like/", images.views.image_like, name="like"),
+    path("like/", images.views.ImageLikeView.as_view(), name="like"),
 ]

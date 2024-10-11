@@ -1,10 +1,9 @@
 from typing import Any
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.http import require_POST
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.views import View
 from django.views.generic import CreateView, DetailView
 
 from images.forms import ImagesCreateForm
@@ -37,6 +36,7 @@ class ImageCreateView(LoginRequiredMixin, CreateView):
         context["section"] = "images"
         return context
 
+
 class ImageDetailView(DetailView):
     model = Images
     template_name = "images/image/detail.html"
@@ -49,19 +49,31 @@ class ImageDetailView(DetailView):
         return context
 
 
-@login_required
-@require_POST
-def image_like(request):
-    image_id = request.POST.get('id')
-    action = request.POST.get('action')
-    if image_id and action:
+class ImageLikeView(LoginRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request: HttpRequest) -> HttpResponse:
+        image_id = request.POST.get("id")
+        action = request.POST.get("action")
+
+        if not image_id or not action:
+            return JsonResponse(
+                {"status": "error", "message": "Missing image ID or action"},
+            )
+
         try:
             image = Images.objects.get(id=image_id)
-            if action == 'like':
+            if action == "like":
                 image.users_like.add(request.user)
-            else:
+            elif action == "unlike":
                 image.users_like.remove(request.user)
-            return JsonResponse({'status': 'ok'})
+            else:
+                return JsonResponse(
+                    {"status": "error", "message": "Invalid action"},
+                )
+
+            return JsonResponse({"status": "ok"})
         except Images.DoesNotExist:
-            pass
-    return JsonResponse({'status': 'error'})
+            return JsonResponse(
+                {"status": "error", "message": "Image does not exist"},
+            )
