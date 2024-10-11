@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView
+import django.shortcuts
 
 from images.forms import ImagesCreateForm
 from images.models import Images
@@ -16,21 +17,35 @@ class ImageCreateView(LoginRequiredMixin, CreateView):
     form_class = ImagesCreateForm
     template_name = "images/image/create.html"
 
-    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context["section"] = "images"
-
-        return context
+    def get_initial(self) -> dict[str, Any]:
+        """Overrides the method to include GET data in the form's initial values."""
+        initial = super().get_initial()
+        # Ensure GET data is included in the form
+        initial.update(self.request.GET.dict())
+        return initial
 
     def form_valid(self, form: ImagesCreateForm) -> HttpResponse:
-        form.instance.user = self.request.user
+        """Handle a valid form submission."""
+        form.instance.user = self.request.user  # Set the user for the image
+        # Add a success message when the form is valid
         messages.success(self.request, "Image added successfully")
-
+        # Call the super method to complete the form processing
         return super().form_valid(form)
 
-    def get_success_url(self) -> Any:
+    def form_invalid(self, form: ImagesCreateForm) -> HttpResponse:
+        """Handle an invalid form submission, logging errors for debugging."""
+        print(form.errors)  # Log form errors for debugging
+        return super().form_invalid(form)
+
+    def get_success_url(self) -> str:
+        """Redirect to the image's detail page after a successful creation."""
         return self.object.get_absolute_url()
 
+    def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
+        """Add custom context to the template."""
+        context = super().get_context_data(**kwargs)
+        context["section"] = "images"
+        return context
 
 class ImageDetailView(DetailView):
     model = Images
