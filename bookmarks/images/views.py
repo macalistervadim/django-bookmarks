@@ -1,8 +1,10 @@
 from typing import Any
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView
 
 from images.forms import ImagesCreateForm
@@ -40,3 +42,24 @@ class ImageDetailView(DetailView):
         context["section"] = "images"
 
         return context
+
+
+@login_required
+@require_POST
+def image_like(request):
+    image_id = request.POST.get("id")
+    action = request.POST.get("action")
+    if image_id and action:
+        try:
+            image = Images.objects.get(pk=image_id)
+            if action == "like":
+                image.users_like.add(request.user)
+            else:
+                image.users_like.remove(request.user)
+
+            return JsonResponse({"status": "ok"})
+
+        except Images.DoesNotExit:
+            pass
+
+    return JsonResponse({"status": "error"})

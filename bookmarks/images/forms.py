@@ -17,7 +17,7 @@ class ImagesCreateForm(forms.ModelForm):
             Images.url.field.name,
         ]
         widgets = {
-            Images.url.field.name: forms.HiddenInput,
+            Images.url.field.name: forms.HiddenInput(),
         }
 
     def clean_url(self) -> Any:
