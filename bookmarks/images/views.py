@@ -6,7 +6,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, DetailView
-import django.shortcuts
 
 from images.forms import ImagesCreateForm
 from images.models import Images
@@ -18,31 +17,22 @@ class ImageCreateView(LoginRequiredMixin, CreateView):
     template_name = "images/image/create.html"
 
     def get_initial(self) -> dict[str, Any]:
-        """Overrides the method to include GET data in the form's initial values."""
         initial = super().get_initial()
-        # Ensure GET data is included in the form
         initial.update(self.request.GET.dict())
         return initial
 
     def form_valid(self, form: ImagesCreateForm) -> HttpResponse:
-        """Handle a valid form submission."""
-        form.instance.user = self.request.user  # Set the user for the image
-        # Add a success message when the form is valid
+        form.instance.user = self.request.user
         messages.success(self.request, "Image added successfully")
-        # Call the super method to complete the form processing
         return super().form_valid(form)
 
     def form_invalid(self, form: ImagesCreateForm) -> HttpResponse:
-        """Handle an invalid form submission, logging errors for debugging."""
-        print(form.errors)  # Log form errors for debugging
         return super().form_invalid(form)
 
     def get_success_url(self) -> str:
-        """Redirect to the image's detail page after a successful creation."""
         return self.object.get_absolute_url()
 
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
-        """Add custom context to the template."""
         context = super().get_context_data(**kwargs)
         context["section"] = "images"
         return context
@@ -62,19 +52,16 @@ class ImageDetailView(DetailView):
 @login_required
 @require_POST
 def image_like(request):
-    image_id = request.POST.get("id")
-    action = request.POST.get("action")
+    image_id = request.POST.get('id')
+    action = request.POST.get('action')
     if image_id and action:
         try:
-            image = Images.objects.get(pk=image_id)
-            if action == "like":
+            image = Images.objects.get(id=image_id)
+            if action == 'like':
                 image.users_like.add(request.user)
             else:
                 image.users_like.remove(request.user)
-
-            return JsonResponse({"status": "ok"})
-
-        except Images.DoesNotExit:
+            return JsonResponse({'status': 'ok'})
+        except Images.DoesNotExist:
             pass
-
-    return JsonResponse({"status": "error"})
+    return JsonResponse({'status': 'error'})

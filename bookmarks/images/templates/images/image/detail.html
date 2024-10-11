@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block title %}{{ image.title }}{% endblock %}
 
@@ -8,14 +8,15 @@
   <a href="{{ image.image.url }}">
     <img src="{% thumbnail image.image 300x0 %}" class="image-detail">
   </a>
-  {% with total_likes=image.users.like.count users_like=image.users_like.all %}
+  {% with total_likes=image.users_like.count users_like=image.users_like.all %}
     <div class="image-info">
       <div>
         <span class="count">
           <span class="total">{{ total_likes }}</span>
-          {{ total_likes }} like{{ total_likes|pluralize }}
+          like{{ total_likes|pluralize }}
         </span>
-        <a href="#" data-id="{{ image.id }}" data-action="{% if request.user in users_like %}un{% endif %}like" class="like button">
+        <a href="#" data-id="{{ image.id }}" data-action="{% if request.user in users_like %}un{% endif %}like"
+    class="like button">
           {% if request.user not in users_like %}
             Like
           {% else %}
@@ -26,7 +27,7 @@
       {{ image.description|linebreaks }}
     </div>
     <div class="image-likes">
-      {% for user in image.users_like.all %}
+      {% for user in users_like %}
         <div>
           {% if user.profile.photo %}
             <img src="{{ user.profile.photo.url }}">
