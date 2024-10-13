@@ -4,10 +4,11 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import User
 from django.http import HttpResponse
 import django.shortcuts
 from django.urls import reverse_lazy
-from django.views.generic import FormView, TemplateView
+from django.views.generic import DetailView, FormView, ListView, TemplateView
 
 import account.forms
 import account.models
@@ -122,3 +123,34 @@ class EditView(LoginRequiredMixin, FormView):
             instance=self.request.user.profile,
         )
         return self.render_to_response(context)
+
+
+class UserListView(LoginRequiredMixin, ListView):
+    model = User  # Указываем модель
+    template_name = "account/user/list.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["section"] = "people"
+        context["users"] = self.get_queryset()
+        return context
+
+    def get_queryset(self):
+        return User.objects.filter(is_active=True)
+
+
+class UserDetailView(LoginRequiredMixin, DetailView):
+    model = User
+    template_name = "account/user/detail.html"
+
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["section"] = "people"
+
+        return context
+
+    def get_object(self, queryset=None):
+        username = self.kwargs.get("username")
+        user = User.objects.get(username=username, is_active=True)
+
+        return user
