@@ -1,8 +1,11 @@
 from typing import Any
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.http import HttpRequest, HttpResponse, JsonResponse
+import django.shortcuts
 from django.views import View
 from django.views.generic import CreateView, DetailView
 
@@ -77,3 +80,33 @@ class ImageLikeView(LoginRequiredMixin, View):
             return JsonResponse(
                 {"status": "error", "message": "Image does not exist"},
             )
+
+
+@login_required
+def image_list(request):
+    images = Images.objects.all()
+    paginator = Paginator(images, 8)
+    page = request.GET.get("page")
+    images_only = request.GET.get("images_only")
+
+    try:
+        images = paginator.page(page)
+    except PageNotAnInteger:
+        images = paginator.page(1)
+    except EmptyPage:
+        if images_only:
+            return HttpResponse("")
+        images = paginator.page(paginator.num_pages)
+
+    if images_only:
+        return django.shortcuts.render(
+            request,
+            "images/image/list_images.html",
+            {"section": "images", "images": images},
+        )
+
+    return django.shortcuts.render(
+        request,
+        "images/image/list.html",
+        {"section": "images", "images": images},
+    )

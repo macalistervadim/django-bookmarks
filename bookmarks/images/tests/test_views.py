@@ -194,3 +194,71 @@ class TestImageLikeView(TestCase):
             response.content,
             {"status": "error", "message": "Missing image ID or action"},
         )
+
+
+class TestImageListView(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",
+            password="testpass",
+        )
+        self.profile = Profile.objects.create(
+            user=self.user,
+        )
+
+        image_file = SimpleUploadedFile(
+            "test_image.jpg",
+            b"file_content",
+            content_type="image/jpeg",
+        )
+        self.image = Images.objects.create(
+            user=self.user,
+            title="Test Image",
+            description="Test Description",
+            url="https://example.com/image.jpg",
+            slug="test-image",
+            image=image_file,
+        )
+
+    def test_image_list_pagination(self):
+        self.client.login(username="testuser", password="testpass")
+
+        for i in range(10):
+            Images.objects.create(
+                user=self.user,
+                title=f"Image {i}",
+                description="Test Description",
+                url=f"https://example.com/image_{i}.jpg",
+                slug=f"image-{i}",
+                image=SimpleUploadedFile(
+                    f"test_image_{i}.jpg",
+                    b"file_content",
+                    content_type="image/jpeg",
+                ),
+            )
+
+        url = django.shortcuts.reverse("images:list")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(len(response.context["images"]), 8)
+
+    def test_image_list_view_valid_data(self):
+        self.client.login(username="testuser", password="testpass")
+
+        url = django.shortcuts.reverse("images:list")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertEqual(Images.objects.count(), 1)
+        self.assertContains(response, "Test Image")
+
+    def test_image_list_view_anonymous_user(self):
+        url = django.shortcuts.reverse("images:list")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        url_redirect = (
+            django.shortcuts.reverse("account:login") + "?next=" + url
+        )
+        self.assertRedirects(response, url_redirect)

@@ -127,3 +127,47 @@ class TestDetailUrls(TestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 404)
+
+
+class TestImageListUrls(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="mail@mail.com",
+            password="password",
+        )
+        self.profile = Profile.objects.create(
+            user=self.user,
+        )
+        image_file = SimpleUploadedFile(
+            "test_image.jpg",
+            b"file_content",
+            content_type="image/jpeg",
+        )
+        self.image = Images.objects.create(
+            user=self.user,
+            title="Test Image",
+            description="Test Description",
+            url="https://example.com/image.jpg",
+            slug="test-image",
+            image=image_file,
+        )
+
+    def test_image_list_url_valid(self):
+        self.client.login(username="testuser", password="password")
+
+        url = django.shortcuts.reverse("images:list")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertContains(response, "Test Image")
+
+    def test_image_list_url_anonymous_user(self):
+        url = django.shortcuts.reverse("images:list")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        url_redirect = (
+            django.shortcuts.reverse("account:login") + "?next=" + url
+        )
+        self.assertRedirects(response, url_redirect)
