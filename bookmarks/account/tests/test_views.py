@@ -1,8 +1,11 @@
 from http import HTTPStatus
 
 from django.contrib.auth.models import User
+import django.shortcuts
 from django.test import TestCase
 from django.urls import reverse
+
+import account.models
 
 
 class TestDashboardView(TestCase):
@@ -147,3 +150,80 @@ class TestRegistrationView(TestCase):
         self.client.post(reverse("account:register"), data)
         user = User.objects.get(username="user1")
         self.assertIsNotNone(user)
+
+
+class TestUserFollowView(TestCase):
+    def setUp(self):
+        self.user1 = User.objects.create_user(
+            username="testuser1",
+            password="password",
+        )
+        self.user2 = User.objects.create_user(
+            username="testuser2",
+            password="password",
+        )
+
+    def test_user_follow_view_valid_follow(self):
+        self.client.login(username="testuser1", password="password")
+
+        response = self.client.post(
+            reverse("account:user_follow"),
+            {"id": self.user2.id, "action": "follow"},
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertJSONEqual(response.content, {"status": "ok"})
+
+        self.assertTrue(
+            account.models.Contact.objects.filter(
+                user_from=self.user1,
+                user_to=self.user2,
+            ).exists(),
+        )
+
+    def test_user_follow_view_valid_unfollow(self):
+        account.models.Contact.objects.create(
+            user_from=self.user1,
+            user_to=self.user2,
+        )
+
+        self.client.login(username="testuser1", password="password")
+
+        response = self.client.post(
+            reverse("account:user_follow"),
+            {"id": self.user2.id, "action": "unfollow"},
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertJSONEqual(response.content, {"status": "ok"})
+
+        self.assertFalse(
+            account.models.Contact.objects.filter(
+                user_from=self.user1,
+                user_to=self.user2,
+            ).exists(),
+        )
+
+    def test_user_follow_view_invalid_user(self):
+        self.client.login(username="testuser1", password="password")
+
+        response = self.client.post(
+            reverse("account:user_follow"),
+            {"id": 9999, "action": "follow"},
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+
+    def test_user_follow_view_not_logged_in(self):
+        response = self.client.post(
+            reverse("account:user_follow"),
+            {"id": self.user2.id, "action": "follow"},
+        )
+
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        url_redirect = (
+            django.shortcuts.reverse("account:login")
+            + "?next="
+            + django.shortcuts.reverse("account:user_follow")
+        )
+        self.assertRedirects(response, url_redirect)

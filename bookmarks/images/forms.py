@@ -31,7 +31,12 @@ class ImagesCreateForm(forms.ModelForm):
 
         return url
 
-    def save(self, force_insert=False, force_update=False, commit=True) -> Any:
+    def save(
+        self,
+        force_insert: bool = False,
+        force_update: bool = False,
+        commit: bool = True,
+    ) -> Any:
         image = super().save(commit=False)
         image_url = self.cleaned_data["url"]
         name = slugify(image.title)

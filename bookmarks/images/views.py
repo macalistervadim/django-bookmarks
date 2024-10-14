@@ -83,7 +83,7 @@ class ImageLikeView(LoginRequiredMixin, View):
 
 
 @login_required
-def image_list(request):
+def image_list(request: HttpRequest) -> HttpResponse:
     images = Images.objects.all()
     paginator = Paginator(images, 8)
     page = request.GET.get("page")

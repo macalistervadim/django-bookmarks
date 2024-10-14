@@ -119,3 +119,28 @@ class TestRegistrationUserUrls(TestCase):
 
         user = User.objects.get(username="user1")
         self.assertIsNotNone(user)
+
+
+class TestUserFollowUrls(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="testuser",
+            email="mail@mail.com",
+            password="password",
+        )
+
+    def test_user_follow_url_login_user_get_method(self):
+        self.client.login(username="testuser", password="password")
+        response = self.client.get(reverse("account:user_follow"))
+
+        self.assertEqual(response.status_code, HTTPStatus.METHOD_NOT_ALLOWED)
+
+    def test_user_follow_url_anonymous_user(self):
+        response = self.client.get(reverse("account:user_follow"))
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        url_redirect = (
+            reverse("account:login")
+            + "?next="
+            + reverse("account:user_follow")
+        )
+        self.assertRedirects(response, url_redirect)

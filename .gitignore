@@ -172,6 +172,10 @@ cython_debug/
 # certificate
 .pem
 *.pem
+.crt
+*.crt
+.key
+*.key
 
 #fixtures
 *.json
