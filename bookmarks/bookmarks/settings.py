@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "account.apps.AccountConfig",
     "homepage.apps.HomepageConfig",
     "images.apps.ImagesConfig",
+    "actions.apps.ActionsConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

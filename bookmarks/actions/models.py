@@ -1,0 +1,40 @@
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.db import models
+
+
+class Action(models.Model):
+    user = models.ForeignKey(
+        "auth.User",
+        related_name="actions",
+        on_delete=models.CASCADE,
+    )
+    verb = models.CharField(max_length=255)
+    created = models.DateTimeField(auto_now_add=True)
+    target_ct = models.ForeignKey(
+        ContentType,
+        blank=True,
+        null=True,
+        related_name="target_obj",
+        on_delete=models.CASCADE,
+    )
+    target_id = models.PositiveIntegerField(null=True, blank=True)
+    target = GenericForeignKey("target_ct", "target_id")
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["-created"]),
+            models.Index(fields=["target_ct", "target_id"]),
+        ]
+        ordering = ["-created"]
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"user={self.user!r}, "
+            f"verb={self.verb!r}, "
+            f"created={self.created!r}, "
+            f"target_ct={self.target_ct!r}, "
+            f"target_id={self.target_id!r}, "
+            f"target={self.target!r})"
+        )
