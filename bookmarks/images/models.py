@@ -23,10 +23,12 @@ class Images(models.Model):
     image = models.ImageField(upload_to="images/%Y/%m/%d/")
     description = models.TextField(blank=True)
     created = models.DateTimeField(auto_now_add=True)
+    total_likes = models.PositiveIntegerField(default=0)
 
     class Meta:
         indexes = [
             models.Index(fields=["-created"]),
+            models.Index(fields=["-total_likes"]),
         ]
         ordering = ["-created"]
 
@@ -43,6 +45,7 @@ class Images(models.Model):
             f"{self.url!r}, "
             f"{self.image!r}, "
             f"{self.description!r}, "
+            f"{self.total_likes!r}, "
             f"{self.created!r})"
         )
 

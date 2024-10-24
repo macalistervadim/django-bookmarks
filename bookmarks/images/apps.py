@@ -5,3 +5,6 @@ class ImagesConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
     name = "images"
     verbose_name = "Изображения"
+
+    def ready(self):
+        import images.signals
