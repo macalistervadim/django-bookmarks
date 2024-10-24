@@ -9,6 +9,7 @@ import django.shortcuts
 from django.views import View
 from django.views.generic import CreateView, DetailView
 
+from actions.utils import create_action
 from images.forms import ImagesCreateForm
 from images.models import Images
 
@@ -25,6 +26,8 @@ class ImageCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form: ImagesCreateForm) -> HttpResponse:
         form.instance.user = self.request.user
+        self.object = form.save()
+        create_action(self.request.user, "bookmarked image", self.object)
         messages.success(self.request, "Image added successfully")
         return super().form_valid(form)
 
@@ -68,6 +71,7 @@ class ImageLikeView(LoginRequiredMixin, View):
             image = Images.objects.get(id=image_id)
             if action == "like":
                 image.users_like.add(request.user)
+                create_action(request.user, "likes", image)
             elif action == "unlike":
                 image.users_like.remove(request.user)
             else:

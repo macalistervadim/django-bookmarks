@@ -20,6 +20,8 @@ from django.views.generic import (
 
 import account.forms
 import account.models
+from actions.models import Action
+from actions.utils import create_action
 
 
 class UserLoginView(FormView):
@@ -55,6 +57,7 @@ class RegisterView(FormView):
         new_user.set_password(form.cleaned_data["password"])
         new_user.save()
         account.models.Profile.objects.create(user=new_user)
+        create_action(new_user, "has created an account")
 
         return django.shortcuts.render(
             self.request,
@@ -71,9 +74,24 @@ class RegisterView(FormView):
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "account/dashboard.html"
 
+    def get(self, request, *args, **kwargs):
+        actions = Action.objects.exclude(user=request.user)
+        following_ids = request.user.following.values_list("id", flat=True)
+
+        if following_ids:
+            actions = actions.filter(user_id__in=following_ids)
+
+        actions = actions.select_related("user", "user__profile")[
+            :10
+        ].prefetch_related("target")[:10]
+
+        self.actions = actions
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["section"] = "dashboard"
+        context["actions"] = self.actions
 
         return context
 
@@ -193,6 +211,7 @@ class UserFollowView(LoginRequiredMixin, View):
                     user_from=request.user,
                     user_to=user,
                 )
+                create_action(request.user, "is following", user)
             else:
                 account.models.Contact.objects.filter(
                     user_from=request.user,
