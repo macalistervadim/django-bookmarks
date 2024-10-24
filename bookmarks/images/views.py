@@ -1,6 +1,8 @@
 from typing import Any
 
+import redis
 from django.contrib import messages
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
@@ -12,6 +14,10 @@ from django.views.generic import CreateView, DetailView
 from actions.utils import create_action
 from images.forms import ImagesCreateForm
 from images.models import Images
+
+
+# Connect Redis DB
+r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB)
 
 
 class ImageCreateView(LoginRequiredMixin, CreateView):
@@ -47,10 +53,17 @@ class ImageDetailView(DetailView):
     model = Images
     template_name = "images/image/detail.html"
 
+    def get(self, request, *args, **kwargs):
+        self.image = self.get_object()
+        self.total_views = r.incr(f"image:{self.image.id}:views")
+
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs: Any) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["image"] = self.object
         context["section"] = "images"
+        context["total_views"] = self.total_views
 
         return context
 
