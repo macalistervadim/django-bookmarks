@@ -15,6 +15,7 @@ psycopg2-binary = "^2.9.9"
 requests = "^2.32.3"
 easy-thumbnails = "^2.10"
 django-extensions = "^3.2.3"
+django-debug-toolbar = "^4.4.6"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.1.1"

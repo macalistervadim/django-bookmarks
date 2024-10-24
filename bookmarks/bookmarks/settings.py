@@ -163,6 +163,12 @@ if DEBUG:
     mimetypes.add_type("application/javascript", ".js", True)
     mimetypes.add_type("text/css", ".css", True)
 
+    INSTALLED_APPS.append(
+        "debug_toolbar",
+    )
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+    INTERNAL_IPS = ["127.0.0.1", "localhost"]
+
 ABSOLUTE_URL_OVERRIDES = {
     "auth.user": lambda u: reverse_lazy(
         "account:user_detail",
