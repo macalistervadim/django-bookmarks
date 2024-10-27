@@ -15,4 +15,5 @@ urlpatterns = [
     ),
     path("like/", images.views.ImageLikeView.as_view(), name="like"),
     path("", images.views.image_list, name="list"),
+    path("ranking/", images.views.image_ranking, name="ranking"),
 ]

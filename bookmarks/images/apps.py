@@ -7,4 +7,4 @@ class ImagesConfig(AppConfig):
     verbose_name = "Изображения"
 
     def ready(self):
-        import images.signals
+        import images.signals  # noqa:F401

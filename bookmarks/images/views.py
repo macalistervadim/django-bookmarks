@@ -1,8 +1,7 @@
 from typing import Any
 
-import redis
-from django.contrib import messages
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
@@ -10,6 +9,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 import django.shortcuts
 from django.views import View
 from django.views.generic import CreateView, DetailView
+import redis
 
 from actions.utils import create_action
 from images.forms import ImagesCreateForm
@@ -17,7 +17,11 @@ from images.models import Images
 
 
 # Connect Redis DB
-r = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, db=settings.REDIS_DB)
+r = redis.Redis(
+    host=settings.REDIS_HOST,
+    port=settings.REDIS_PORT,
+    db=settings.REDIS_DB,
+)
 
 
 class ImageCreateView(LoginRequiredMixin, CreateView):
@@ -56,6 +60,11 @@ class ImageDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         self.image = self.get_object()
         self.total_views = r.incr(f"image:{self.image.id}:views")
+        r.zincrby(
+            "image_ranking",
+            1,
+            self.image.id,
+        )  # Увеличить рейтинг изображения на 1
 
         return super().get(request, *args, **kwargs)
 
@@ -126,4 +135,19 @@ def image_list(request: HttpRequest) -> HttpResponse:
         request,
         "images/image/list.html",
         {"section": "images", "images": images},
+    )
+
+
+@login_required
+def image_ranking(request: HttpRequest) -> HttpResponse:
+    image_ranking = r.zrange("image_ranking", 0, -1, desc=True)[:10]
+    image_ranking_ids = [int(id) for id in image_ranking]
+
+    most_viewed = list(Images.objects.filter(id__in=image_ranking_ids))
+    most_viewed.sort(key=lambda x: image_ranking_ids.index(x.id))
+
+    return django.shortcuts.render(
+        request,
+        "images/image/ranking.html",
+        {"section": "images", "most_viewed": most_viewed},
     )
